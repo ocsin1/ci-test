@@ -133,29 +133,26 @@ jobs:
             exit 0
           fi
 
-          # 用 python 做模板替换，避免 sed 注入（| & 等特殊字符）
-          PR_BODY="$(python3 -c "
-          import os
-          body = '''## Summary
-          - This PR automatically cherry-picks the fix merged into a release branch (\`__RELEASE_BRANCH__\`) back to the main development branch (\`v2\`).
-          - Original PR: #__PR_NUMBER__
-          - Original title: __PR_TITLE__
+          python3 << 'PYEOF'
+            import subprocess, os
 
-          ## Why
-          The fix was first applied to a release branch. This PR ensures the same fix is also available in the main development branch (v2).
+            pr_number  = os.environ["PR_NUMBER"]
+            pr_title   = os.environ["PR_TITLE"]
+            branch     = os.environ["FIX_BRANCH"]
+            rel_branch = os.environ["RELEASE_BRANCH"]
 
-          ## Auto-generated
-          This PR was created automatically by the \`cherry-pick-to-v2\` workflow.
-          [skip changelog]
-          '''
-          body = body.replace('__RELEASE_BRANCH__', os.environ['RELEASE_BRANCH'])
-          body = body.replace('__PR_NUMBER__',     os.environ['PR_NUMBER'])
-          body = body.replace('__PR_TITLE__',      os.environ['PR_TITLE'])
-          print(body)
-          ")"
+            r = subprocess.run(
+                ["gh", "pr", "view", pr_number, "--json", "body", "--jq", ".body"],
+                capture_output=True, text=True, check=True
+            )
+            body = r.stdout.strip() + "\n\n---\n\n"
+            body += "Backport of #" + pr_number + " from " + rel_branch + " to v2.\n\n[skip changelog]"
 
-          gh pr create \
-            --base v2 \
-            --head "$FIX_BRANCH" \
-            --title "fix: cherry-pick #${PR_NUMBER} from ${RELEASE_BRANCH} to v2" \
-            --body "$PR_BODY"
+            subprocess.run([
+                "gh", "pr", "create",
+                "--base",  "v2",
+                "--head",  branch,
+                "--title", pr_title + " (cherry-pick of #" + pr_number + ")",
+                "--body",  body,
+            ], check=True)
+          PYEOF
