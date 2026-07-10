@@ -19,7 +19,7 @@
                 "custom_recognition_param": {
                     "expected": [
                         {
-                            // 淤积点附近（锚点也在这个区域里）推东西测试
+                            // 淤积点附近（锚点也在这个区域里）推东西测试1
                             "map_name": "map01_lv001",
                             "target": [
                                 385.0,
