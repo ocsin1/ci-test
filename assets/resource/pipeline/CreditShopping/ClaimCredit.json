@@ -31,6 +31,7 @@
             "无待领取信用",
             "無待領取信用",
             "(?i)No\\s*credits\\s*to\\s*claim",
+            "FP受取済",
             "FP未獲得"
         ],
         "replace": [
