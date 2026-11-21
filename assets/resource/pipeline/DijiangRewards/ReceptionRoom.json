@@ -1041,8 +1041,9 @@
                 ],
                 "expected": [
                     "已填入",
-                    "(?i)Pegged",
-                    "配置中"
+                    "(?i)Added",
+                    "配置中",
+                    "(?i)Pegged"
                 ],
                 "order_by": "Vertical"
             }
